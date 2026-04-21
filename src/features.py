@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 MODELS_DIR = os.path.join(BASE_DIR, "models")
-INPUT_FILE = os.path.join(DATA_DIR, "laps_2023_2025.parquet")
+INPUT_FILE = os.path.join(DATA_DIR, "laps_2023_2026.parquet")
 OUTPUT_FILE = os.path.join(DATA_DIR, "features.parquet")
 
 os.makedirs(MODELS_DIR, exist_ok=True)

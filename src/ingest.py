@@ -1,8 +1,8 @@
 """
 Step 1 — Data Ingestion
-Pull all race laps from 2023, 2024, 2025 seasons via FastF1.
+Pull all race laps from 2023, 2024, 2025, 2026 seasons via FastF1.
 Filter to accurate, clean racing laps. Aggregate per-lap telemetry.
-Save to data/laps_2023_2025.parquet.
+Save to data/laps_2023_2026.parquet.
 """
 
 import os
@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 CACHE_DIR = os.path.join(DATA_DIR, "fastf1_cache")
-OUTPUT_FILE = os.path.join(DATA_DIR, "laps_2023_2025.parquet")
+OUTPUT_FILE = os.path.join(DATA_DIR, "laps_2023_2026.parquet")
 
 # Ensure directories exist
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -31,7 +31,7 @@ fastf1.Cache.enable_cache(CACHE_DIR)
 # FastF1 TrackStatus: '1'=Green, '2'=Yellow, '4'=SC, '5'=Red, '6'=VSC, '7'=VSC Ending
 SC_VSC_CODES = {'4', '5', '6', '7'}
 
-SEASONS = [2023, 2024, 2025]
+SEASONS = [2023, 2024, 2025, 2026]
 
 
 def aggregate_telemetry(lap):
@@ -117,9 +117,13 @@ def process_season(year):
             print(f"    ⚠ Failed to load session: {e}")
             continue
 
-        laps = session.laps
-        if laps is None or laps.empty:
-            print(f"    ⚠ No lap data available")
+        try:
+            laps = session.laps
+            if laps is None or laps.empty:
+                print(f"    No lap data available")
+                continue
+        except Exception as e:
+            print(f"    Data not loaded for this race (likely hasn't occurred yet). Skipping.")
             continue
 
         # ── Core Filters ────────────────────────────────────────
@@ -206,9 +210,7 @@ def process_season(year):
 
 
 def main():
-    print("=" * 60)
-    print("  F1 LAP TIME INGESTION — 2023, 2024, 2025")
-    print("=" * 60)
+    print("  F1 LAP TIME INGESTION — 2023, 2024, 2025, 2026")
 
     all_seasons = []
     for year in SEASONS:

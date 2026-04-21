@@ -31,25 +31,26 @@ def main():
     df = pd.read_parquet(INPUT_FILE)
 
     # ── 1. Chronological Split ──────────────────────────────────────────
-    # Train: 2023, 2024
-    # Val: 2025 first half
-    # Test: 2025 second half
+    # Train: 2023, 2024, 2025
+    # Val: 2026 first half
+    # Test: 2026 second half
     
-    rounds_2025 = df[df['Year'] == 2025]['RoundNumber'].unique()
-    if len(rounds_2025) > 0:
-        median_round_2025 = np.median(rounds_2025)
+    rounds_2026 = df[df['Year'] == 2026]['RoundNumber'].unique()
+    if len(rounds_2026) > 0:
+        median_round_2026 = np.median(rounds_2026)
     else:
-        median_round_2025 = 12 # Fallback if no 2025 data
+        median_round_2026 = 12 # Fallback if no 2026 data
     
-    train_mask = (df['Year'] == 2023) | (df['Year'] == 2024)
-    val_mask = (df['Year'] == 2025) & (df['RoundNumber'] <= median_round_2025)
-    test_mask = (df['Year'] == 2025) & (df['RoundNumber'] > median_round_2025)
+    train_mask = (df['Year'] >= 2023) & (df['Year'] <= 2025)
+    val_mask = (df['Year'] == 2026) & (df['RoundNumber'] <= median_round_2026)
+    test_mask = (df['Year'] == 2026) & (df['RoundNumber'] > median_round_2026)
     
-    # If there's no test set (e.g., incomplete 2025), fallback strategy
+    # If there's no test set (e.g., incomplete 2026), fallback strategy
     if not test_mask.any():
-        print("  ⚠ No data for 2025 second half. Adjusting split...")
-        val_mask = (df['Year'] == 2025) & (df['RoundNumber'] <= np.percentile(rounds_2025, 50))
-        test_mask = (df['Year'] == 2025) & (df['RoundNumber'] > np.percentile(rounds_2025, 50))
+        print("  ⚠ No data for 2026 second half. Adjusting split...")
+        if len(rounds_2026) > 0:
+            val_mask = (df['Year'] == 2026) & (df['RoundNumber'] <= np.percentile(rounds_2026, 50))
+            test_mask = (df['Year'] == 2026) & (df['RoundNumber'] > np.percentile(rounds_2026, 50))
     if not test_mask.any():
         print("  ⚠ Still no test data. Reverting to random 80/10/10 split (fallback)")
         shuffled = df.sample(frac=1, random_state=42).reset_index(drop=True)
