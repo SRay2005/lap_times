@@ -1,26 +1,30 @@
 """
-Step 5 — Visualisation
+Step 5 - Visualisation
 Generate 4 publication-quality plots.
 """
 
 import os
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 
-from src.features import FEATURE_COLS   # single source of truth — never redefine locally
+# Path bootstrap - allows 'from src.features import ...' when run as python src/visualise.py
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 
-# ── Paths ──────────────────────────────────────────────────────────────
-BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from src.features import FEATURE_COLS   # single source of truth - never redefine locally
+
+# -- Paths -----------------------------------------------------------------
 DATA_DIR    = os.path.join(BASE_DIR, "data")
 MODELS_DIR  = os.path.join(BASE_DIR, "models")
 OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
 
 os.makedirs(OUTPUTS_DIR, exist_ok=True)
 
-# ── Global style ───────────────────────────────────────────────────────
+# -- Global style ----------------------------------------------------------
 plt.style.use('dark_background')
 sns.set_theme(
     style="darkgrid",
@@ -35,9 +39,9 @@ sns.set_theme(
     }
 )
 
-F1_RED   = '#E10600'
-F1_TEAL  = '#00D2BE'
-F1_GREY  = '#A6A6A6'
+F1_RED  = '#E10600'
+F1_TEAL = '#00D2BE'
+F1_GREY = '#A6A6A6'
 
 
 def save(filename):
@@ -45,10 +49,10 @@ def save(filename):
     plt.tight_layout()
     plt.savefig(path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"    Saved → {path}")
+    print(f"    Saved -> {path}")
 
 
-# ── Plot 1 ─────────────────────────────────────────────────────────────
+# -- Plot 1 ----------------------------------------------------------------
 def plot_feature_importance(model):
     print("  Generating Plot 1: Feature Importance...")
     importances = model.feature_importances_
@@ -64,11 +68,11 @@ def plot_feature_importance(model):
     save('feature_importance.png')
 
 
-# ── Plot 2 ─────────────────────────────────────────────────────────────
+# -- Plot 2 ----------------------------------------------------------------
 def plot_predicted_vs_actual(test_preds_file):
     print("  Generating Plot 2: Predicted vs Actual...")
     if not os.path.exists(test_preds_file):
-        print("    ⚠ Test predictions file missing, skipping.")
+        print("    Warning: Test predictions file missing, skipping.")
         return
 
     df = pd.read_parquet(test_preds_file)
@@ -95,23 +99,23 @@ def plot_predicted_vs_actual(test_preds_file):
     save('predicted_vs_actual.png')
 
 
-# ── Plot 3 ─────────────────────────────────────────────────────────────
+# -- Plot 3 ----------------------------------------------------------------
 def plot_regulation_impact(impact_file):
     """
     Bar chart of mean regulation_delta per circuit with 95% CI error bars.
 
     regulation_delta = predicted - actual
-        positive → car is FASTER than baseline expected  → teal
-        negative → car is SLOWER than baseline expected  → red
+        positive -> car is FASTER than baseline expected  -> teal
+        negative -> car is SLOWER than baseline expected  -> red
     """
     print("  Generating Plot 3: 2026 Regulation Impact...")
     if not os.path.exists(impact_file):
-        print("    ⚠ 2026 impact file missing, skipping.")
+        print("    Warning: 2026 impact file missing, skipping.")
         return
 
     df = pd.read_parquet(impact_file)
     if df.empty:
-        print("    ⚠ 2026 impact data is empty, skipping.")
+        print("    Warning: 2026 impact data is empty, skipping.")
         return
 
     stats = (df.groupby('Circuit')['regulation_delta']
@@ -132,7 +136,7 @@ def plot_regulation_impact(impact_file):
     plt.axhline(0, color='white', linewidth=1)
     plt.title(
         '2026 Regulation Impact per Circuit\n'
-        '(Predicted − Actual: positive = faster than pre-2026 baseline)',
+        '(Predicted - Actual: positive = faster than pre-2026 baseline)',
         fontsize=14, fontweight='bold', pad=20
     )
     plt.ylabel('Delta (seconds)', fontsize=12)
@@ -141,7 +145,7 @@ def plot_regulation_impact(impact_file):
     save('regulation_impact.png')
 
 
-# ── Plot 4 ─────────────────────────────────────────────────────────────
+# -- Plot 4 ----------------------------------------------------------------
 def plot_season_trend(impact_file):
     """
     Season-long line chart: pre-2026 baseline prediction vs 2026 actuals.
@@ -149,16 +153,14 @@ def plot_season_trend(impact_file):
     """
     print("  Generating Plot 4: Season Trend...")
     if not os.path.exists(impact_file):
-        print("    ⚠ 2026 impact file missing, skipping.")
+        print("    Warning: 2026 impact file missing, skipping.")
         return
 
     df = pd.read_parquet(impact_file)
     if df.empty:
-        print("    ⚠ 2026 impact data is empty, skipping.")
+        print("    Warning: 2026 impact data is empty, skipping.")
         return
 
-    # Use RoundNumber for chronological ordering if present
-    group_cols = ['Circuit']
     if 'RoundNumber' in df.columns:
         round_order = (df.groupby('Circuit')['RoundNumber']
                          .min()
@@ -166,7 +168,6 @@ def plot_season_trend(impact_file):
                          .index
                          .tolist())
     else:
-        # Fallback: order by first appearance in the file
         round_order = df['Circuit'].unique().tolist()
 
     agg = (df.groupby('Circuit')[['actual_laptime', 'predicted_laptime']]
@@ -196,7 +197,7 @@ def plot_season_trend(impact_file):
     save('season_trend.png')
 
 
-# ── Entry point ────────────────────────────────────────────────────────
+# -- Entry point -----------------------------------------------------------
 def main():
     print("=" * 60)
     print("  F1 RESULTS VISUALISATION")
@@ -207,7 +208,7 @@ def main():
         model = joblib.load(model_path)
         plot_feature_importance(model)
     else:
-        print(f"  ⚠ Model not found at {model_path}. Skipping Feature Importance plot.")
+        print(f"  Warning: Model not found at {model_path}. Skipping Feature Importance plot.")
 
     test_preds_file = os.path.join(DATA_DIR, "test_predictions.parquet")
     plot_predicted_vs_actual(test_preds_file)
@@ -216,7 +217,7 @@ def main():
     plot_regulation_impact(impact_file)
     plot_season_trend(impact_file)
 
-    print("  ✓ Visualisations saved to outputs/")
+    print("  Done: Visualisations saved to outputs/")
     print("=" * 60)
 
 

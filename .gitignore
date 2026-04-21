@@ -1,24 +1,25 @@
-# Python and Virtual Environments
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-ENV/
-env/
-.env
+# Data files
+data/*.parquet
+data/*.csv
 
-# Project specific ignores
-# Ignore the large FastF1 cache files to prevent GitHub size limit errors
+# Trained models and encoders
+models/*.pkl
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# FastF1 cache
 data/fastf1_cache/
 
-# Ignore local logs
+# Pipeline log
 pipeline.log
-*.log
+logs/
 
-# Ignore IDE configs
+# VS Code
 .vscode/
-.idea/
 
-# Ignore output images and graphs so they don't bloat the repo (optional, but good practice)
-# outputs/
+# OS
+.DS_Store
+Thumbs.db

@@ -53,7 +53,7 @@ def main():
         print(f"    Model expects : {model_features}")
         print(f"    FEATURE_COLS  : {FEATURE_COLS}")
         print("\n  Retrain the model (run train.py) to sync with current features.")
-        return
+        sys.exit(1)
 
     # ── 2. Pull 2026 data ──────────────────────────────────────────────
     print("  Pulling 2026 race data...")
