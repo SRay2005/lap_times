@@ -1,13 +1,11 @@
-# run_all.ps1 — F1 Pipeline Runner
+# run_all.ps1 - F1 Pipeline Runner
 # Usage: .\run_all.ps1
-# Logs to: logs/run_YYYYMMDD_HHMMSS.log
 
 $env:PYTHONUTF8 = "1"
 
-# ── Log setup ──────────────────────────────────────────────────────────
-$timestamp  = Get-Date -Format "yyyyMMdd_HHmmss"
-$LogDir     = "logs"
-$LogFile    = "$LogDir\run_$timestamp.log"
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogDir    = "logs"
+$LogFile   = "$LogDir\run_$timestamp.log"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 function Log($msg) {
@@ -17,27 +15,25 @@ function Log($msg) {
 }
 
 function Run-Step($name, $script) {
-    Log "── $name ──────────────────────────────────────"
+    Log "--- $name ---"
     $start = Get-Date
 
-    # Tee stdout+stderr to both console and log
     python $script 2>&1 | Tee-Object -FilePath $LogFile -Append
 
     $elapsed = [math]::Round(((Get-Date) - $start).TotalSeconds, 1)
 
     if ($LASTEXITCODE -ne 0) {
-        Log "✗ $name failed after ${elapsed}s (exit code $LASTEXITCODE)"
-        Log "  See full log: $LogFile"
+        Log "FAILED: $name after ${elapsed}s (exit code $LASTEXITCODE)"
+        Log "See full log: $LogFile"
         exit 1
     }
 
-    Log "✓ $name completed in ${elapsed}s"
+    Log "OK: $name completed in ${elapsed}s"
     Log ""
 }
 
-# ── Pipeline ───────────────────────────────────────────────────────────
 $pipelineStart = Get-Date
-Log "F1 Pipeline starting — log: $LogFile"
+Log "F1 Pipeline starting - log: $LogFile"
 Log ""
 
 Run-Step "ingest.py"     "src/ingest.py"
