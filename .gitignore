@@ -1,0 +1,24 @@
+# Python and Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Project specific ignores
+# Ignore the large FastF1 cache files to prevent GitHub size limit errors
+data/fastf1_cache/
+
+# Ignore local logs
+pipeline.log
+*.log
+
+# Ignore IDE configs
+.vscode/
+.idea/
+
+# Ignore output images and graphs so they don't bloat the repo (optional, but good practice)
+# outputs/
