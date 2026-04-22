@@ -82,7 +82,7 @@ def main():
 
     # ── 5. Predict ─────────────────────────────────────────────────────
     print("  Generating predictions...")
-    X_2026 = features_2026[FEATURE_COLS]   # column order matches model exactly
+    X_2026 = pd.DataFrame(features_2026[FEATURE_COLS].values, columns=FEATURE_COLS)
 
     if X_2026.empty:
         print("\n  ⚠ No valid rows for prediction.")

@@ -17,6 +17,11 @@ data/fastf1_cache/
 pipeline.log
 logs/
 
+
+# Generated outputs
+outputs/*.png
+outputs/*.jpg
+
 # VS Code
 .vscode/
 
